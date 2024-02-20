@@ -1,50 +1,40 @@
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-public class DatabaseSetup {
+@WebServlet("/RegisterServlet")
+public class RegisterServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
-    // JDBC URL, username, and password of MySQL server
-    private static final String JDBC_URL = "jdbc:mysql://192.168.138.126:3306/myDB";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "idrbt";
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
 
-    // JDBC variables for opening, closing, and managing connection
-    private static Connection connection;
+        String name = request.getParameter("Name");
+        String mobile = request.getParameter("mobile");
+        String email = request.getParameter("email");
+        String password = request.getParameter("psw");
 
-    // JDBC variable for executing SQL queries
-    private static PreparedStatement preparedStatement;
-
-    public static void main(String[] args) {
         try {
-            // Step 1: Establishing a connection
-            connection = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASSWORD);
+            // Load the JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Step 2: Create a table
-            createTable();
+            // Establish a connection
+            String jdbcUrl = "jdbc:mysql://localhost:3306/your_database_name";
+            String dbUser = "your_database_user";
+            String dbPassword = "your_database_password";
+            Connection connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPassword);
 
-            // Step 3: Insert data into the table
-            insertData();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Close resources in the finally block to ensure they are released even if an exception occurs
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void createTable() throws SQLException {
+            // Prepare the SQL statement
+            private static void createTable() throws SQLException {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS users (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY," +
                 "name VARCHAR(255) NOT NULL," +
@@ -56,28 +46,24 @@ public class DatabaseSetup {
         preparedStatement.executeUpdate();
         System.out.println("Table created successfully.");
     }
+            String sql = "INSERT INTO users (name, mobile, email, password) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, mobile);
+                preparedStatement.setString(3, email);
+                preparedStatement.setString(4, password);
 
-    private static void insertData() throws SQLException {
-        String insertSQL = "INSERT INTO users (name, mobile, email, password) VALUES (?, ?, ?, ?)";
+                // Execute the statement
+                int rowsAffected = preparedStatement.executeUpdate();
 
-        // Sample data
-        String name = "John Doe";
-        String mobile = "1234567890";
-        String email = "john.doe@example.com";
-        String password = "securepassword";
-
-        preparedStatement = connection.prepareStatement(insertSQL);
-        preparedStatement.setString(1, name);
-        preparedStatement.setString(2, mobile);
-        preparedStatement.setString(3, email);
-        preparedStatement.setString(4, password);
-
-        int rowsAffected = preparedStatement.executeUpdate();
-
-        if (rowsAffected > 0) {
-            System.out.println("Data inserted successfully.");
-        } else {
-            System.out.println("Failed to insert data.");
+                if (rowsAffected > 0) {
+                    out.println("<h1>Registration successful!</h1>");
+                } else {
+                    out.println("<h1>Registration failed. Please try again.</h1>");
+                }
+            }
+        } catch (Exception e) {
+            out.println("<h1>Error: " + e.getMessage() + "</h1>");
         }
     }
 }
