@@ -3,6 +3,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,13 +29,23 @@ public class RegisterServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             // Establish a connection
-            String jdbcUrl = "jdbc:mysql://localhost:3306/your_database_name";
-            String dbUser = "your_database_user";
-            String dbPassword = "your_database_password";
+            String jdbcUrl = "jdbc:mysql://192.168.138.126:3308/myDB";
+            String dbUser = "root";
+            String dbPassword = "idrbt";
             Connection connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPassword);
 
-            // Prepare the SQL statement
-            private static void createTable() throws SQLException {
+            // Create the users table if not exists
+            createTable(connection);
+
+            // Insert data into the users table
+            insertData(connection, name, mobile, email, password, out);
+
+        } catch (ClassNotFoundException | SQLException e) {
+            out.println("<h1>Error: " + e.getMessage() + "</h1>");
+        }
+    }
+
+    private void createTable(Connection connection) throws SQLException {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS users (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY," +
                 "name VARCHAR(255) NOT NULL," +
@@ -42,12 +53,16 @@ public class RegisterServlet extends HttpServlet {
                 "email VARCHAR(255) NOT NULL," +
                 "password VARCHAR(255) NOT NULL)";
 
-        preparedStatement = connection.prepareStatement(createTableSQL);
-        preparedStatement.executeUpdate();
-        System.out.println("Table created successfully.");
+        try (PreparedStatement preparedStatement = connection.prepareStatement(createTableSQL)) {
+            preparedStatement.executeUpdate();
+            System.out.println("Table created successfully.");
+        }
     }
-            String sql = "INSERT INTO users (name, mobile, email, password) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+    private void insertData(Connection connection, String name, String mobile, String email, String password, PrintWriter out) {
+        try {
+            String insertSQL = "INSERT INTO users (name, mobile, email, password) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
                 preparedStatement.setString(1, name);
                 preparedStatement.setString(2, mobile);
                 preparedStatement.setString(3, email);
@@ -62,7 +77,7 @@ public class RegisterServlet extends HttpServlet {
                     out.println("<h1>Registration failed. Please try again.</h1>");
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             out.println("<h1>Error: " + e.getMessage() + "</h1>");
         }
     }
