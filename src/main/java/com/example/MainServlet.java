@@ -1,4 +1,4 @@
-// src/main/java/com/example/MainServlet.java
+// MainServlet.java
 
 package com.example;
 
@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -20,10 +19,10 @@ import javax.servlet.http.HttpServletResponse;
 public class MainServlet extends HttpServlet {
     // Update these values with your database details
     private static final String JDBC_URL = "jdbc:mysql://192.168.138.126:3306/myDB";
-    private static final String JDBC_USER = "root";
-    private static final String JDBC_PASSWORD = "idrbt";
+    private static final String JDBC_USER = "mysql";
+    private static final String JDBC_PASSWORD = "mysql";
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         PrintWriter out = response.getWriter();
 
         try {
@@ -33,16 +32,27 @@ public class MainServlet extends HttpServlet {
             // Establish a connection
             try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD)) {
                 // Perform database operations
-                String sql = "SELECT message FROM web1 WHERE id = ?";
+                String name = request.getParameter("Name");
+                String mobile = request.getParameter("mobile");
+                String email = request.getParameter("email");
+                String password = request.getParameter("psw");
+
+                // SQL query to insert data into the 'web1' table
+                String sql = "INSERT INTO web (name, mobile, email, password) VALUES (?, ?, ?, ?)";
+                
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.setInt(1, 1);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        if (resultSet.next()) {
-                            String message = resultSet.getString("message");
-                            out.println("Message from the database: " + message);
-                        } else {
-                            out.println("No message found in the database.");
-                        }
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, mobile);
+                    preparedStatement.setString(3, email);
+                    preparedStatement.setString(4, password);
+
+                    // Execute the query
+                    int rowsAffected = preparedStatement.executeUpdate();
+
+                    if (rowsAffected > 0) {
+                        out.println("User registered successfully!");
+                    } else {
+                        out.println("Failed to register user.");
                     }
                 }
             }
