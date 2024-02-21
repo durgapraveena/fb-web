@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/main")
 public class MainServlet extends HttpServlet {
     // Update these values with your database details
-    private static final String JDBC_URL = "jdbc:mysql://192.168.138.126:3308/myDB";
+    private static final String JDBC_URL = "jdbc:mysql://192.168.138.126:3306/myDB";
     private static final String JDBC_USER = "root";
     private static final String JDBC_PASSWORD = "idrbt";
 
