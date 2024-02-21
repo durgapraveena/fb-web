@@ -7,7 +7,7 @@
 <body>
 
 <%
-    // Process the form submission
+    // Process the form submission for POST requests
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         String name = request.getParameter("Name");
         String mobile = request.getParameter("mobile");
@@ -19,44 +19,11 @@
 
         // Assuming a simple validation for password matching
         if (password.equals(confirmPassword)) {
-            // Perform database operations to retrieve user information
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                String jdbcUrl = "jdbc:mysql://192.168.138.126:3306/myDB";
-                String jdbcUser = "mysql";
-                String jdbcPassword = "mysql";
-
-                Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
-
-                // SQL query to select user information
-                String selectQuery = "SELECT * FROM web WHERE email = ?";
-                try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
-                    preparedStatement.setString(1, email);
-
-                    ResultSet resultSet = preparedStatement.executeQuery();
-
-                    if (resultSet.next()) {
 %>
-                        <div class="container">
-                            <h1>Thank you, <%= name %>! Happy Learning</h1>
-                            <p>Your Information:</p>
-                            <ul>
-                                <li>Name: <%= resultSet.getString("name") %></li>
-                                <li>Mobile: <%= resultSet.getString("mobile") %></li>
-                                <li>Email: <%= resultSet.getString("email") %></li>
-                            </ul>
-                        </div>
+            <div class="container">
+                <h1>Thank you, <%= name %>! Happy Learning</h1>
+            </div>
 <%
-                    }
-                }
-            } catch (ClassNotFoundException | SQLException e) {
-                e.printStackTrace();
-%>
-                <div class="container">
-                    <p>Error retrieving user information.</p>
-                </div>
-<%
-            }
         } else {
 %>
             <div class="container">
@@ -64,6 +31,52 @@
             </div>
 <%
         }
+    }
+
+    // Process GET requests to display registered user data
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String jdbcUrl = "jdbc:mysql://192.168.138.126:3306/myDB";
+        String jdbcUser = "mysql";
+        String jdbcPassword = "mysql";
+
+        Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
+
+        // SQL query to select all user information
+        String selectAllQuery = "SELECT * FROM web";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(selectAllQuery)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+%>
+            <div class="container">
+                <h1>Registered User Data</h1>
+                <table border="1">
+                    <tr>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                    </tr>
+<%
+            while (resultSet.next()) {
+%>
+                    <tr>
+                        <td><%= resultSet.getString("name") %></td>
+                        <td><%= resultSet.getString("mobile") %></td>
+                        <td><%= resultSet.getString("email") %></td>
+                    </tr>
+<%
+            }
+%>
+                </table>
+            </div>
+<%
+        }
+    } catch (ClassNotFoundException | SQLException e) {
+        e.printStackTrace();
+%>
+        <div class="container">
+            <p>Error retrieving user data.</p>
+        </div>
+<%
     }
 %>
 
@@ -77,4 +90,3 @@
 
 </body>
 </html>
-
