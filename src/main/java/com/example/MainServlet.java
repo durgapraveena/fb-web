@@ -33,7 +33,7 @@ public class MainServlet extends HttpServlet {
             // Establish a connection
             try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD)) {
                 // Perform database operations
-                String sql = "SELECT message FROM web WHERE id = ?";
+                String sql = "SELECT message FROM web1 WHERE id = ?";
                 try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                     preparedStatement.setInt(1, 1);
                     try (ResultSet resultSet = preparedStatement.executeQuery()) {
